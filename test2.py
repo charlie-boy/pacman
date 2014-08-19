@@ -42,23 +42,22 @@ class Person(object):
 				self.board[i][j] = "C"
 
 
-	def update_board(self, px, py, gx, gy):
+	def update_board(self, px, py, b_coords):
 		self.px = px
 		self.py = py
-		self.gx = gx
-		self.gy = gy
+		self.b_coords = b_coords
+
 		if self.checkCoin(self.px, self.py):
 			self.collectCoin()
 			cx, cy = self.place_another_coin()
 			self.board[cx][cy] = "C"
 
 		self.board[self.px][self.py] = "P"
-		self.board[self.gx][self.gy] = "G"
+		for i in range(0, len(b_coords)):
+			self.board[b_coords[i][0]][b_coords[i][1]] = "G"
 
 		self.previous_px = self.px 											# position of pacman at t-1
 		self.previous_py = self.py
-		self.previous_gx = self.gx 											# position of ghost at t-1
-		self.previous_gy = self.gy
 
 	def checkWall(self, x, y):												# mentioned in assignment
 		if(self.board[x][y] == "X"):
@@ -100,7 +99,8 @@ class Person(object):
 
 	def replace_dots(self):
 		self.board[self.previous_px][self.previous_py] = "."
-		self.board[self.previous_gx][self.previous_gy] = "."
+		for i in range(0, len(b_coords)):
+			self.board[b_coords[i][0]][b_coords[i][1]] = "."
 
 	def print_board(self):
 		for i in range(0,15):
@@ -147,15 +147,17 @@ class Ghost(Person):
 
 		return self.x, self.y
 
-def checkGhost(px, py, gx, gy):											# mentioned in assignment
-	if (px == gx and py == gy):
-		exit()
+def checkGhost(px, py, b_coords):											# mentioned in assignment
+	for i in range(0, len(b_coords)):	
+		if (px == b_coords[i][0] and py == b_coords[i][1]):
+			exit()
 
 if __name__ == "__main__":
 	a = Pacman()
-	b = Ghost()
+	b = [Ghost(), Ghost(), Ghost()]
+	b_coords = [[0,3], [0,15], [0,33]]
 	a.board_design()
-	a.update_board(1, 1, 3, 33)
+	a.update_board(1, 1, b_coords)
 	print "*******Rules*********"
 	print "1. use W, A, S, D for movements"
 	print "2. use Q to quit the game"
@@ -167,9 +169,10 @@ if __name__ == "__main__":
 		print ("Score: " + str(a.score))
 		p = raw_input("Enter direction: ")
 		px, py = a.new_position(p)
-		gx, gy = b.ghostPosition()
-		checkGhost(px, py, gx, gy)
-		a.update_board(px, py, gx, gy)
+		for i in range(0, len(b_coords)):
+			b_coords[i] = b[i].ghostPosition()
+		checkGhost(px, py, b_coords)
+		a.update_board(px, py, b_coords)
 		a.print_board()
 		a.replace_dots()
 		if p == "q" or p == "Q":
