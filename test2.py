@@ -7,10 +7,6 @@ class Person(object):
 	def __init__(self):
 		self.board = board
 		self.score = score
-		self.previous_px = 1											# position of pacman at t-1
-		self.previous_py = 1
-		self.previous_gx = 33 											# position of ghost at t-1
-		self.previous_gy = 3
 
 	def board_design(self):												# basic_board_design
 		for i in range(3, 12):											# "X" represents wall
@@ -48,8 +44,8 @@ class Person(object):
 		self.b_coords = b_coords
 
 		if self.checkCoin(self.px, self.py):
-			self.collectCoin()
-			cx, cy = self.place_another_coin()
+			self.collectCoin()												# increments the number of coin
+			cx, cy = self.place_another_coin()								# places random coins on the board
 			self.board[cx][cy] = "C"
 
 		self.board[self.px][self.py] = "P"
@@ -97,7 +93,7 @@ class Person(object):
 
 		return cx, cy
 
-	def replace_dots(self):
+	def replace_dots(self):												# replace dots again after change in position of pacman and ghosts
 		self.board[self.previous_px][self.previous_py] = "."
 		for i in range(0, len(b_coords)):
 			self.board[b_coords[i][0]][b_coords[i][1]] = "."
@@ -112,7 +108,7 @@ class Pacman(Person):
 		self.x = x
 		self.y = y
 
-	def new_position(self,p):
+	def new_position(self, p):											# returns the position of pacman according to the input(w,a,s,d)
 		if p == "a":
 			self.y = self.y - 1
 
@@ -137,11 +133,11 @@ class Ghost(Person):
 		self.x = x
 		self.y = y
 
-	def ghostPosition(self):											# mentioned in assignment
+	def ghostPosition(self):											# mentioned in assignment. Returns the position of Ghost
 		self.x = random.randrange(0, 15, 1)
 		self.y = random.randrange(0, 35, 1)
 
-		while (self.checkWall(self.x, self.y) or self.checkCoin(self.x, self.y)):
+		while (self.checkWall(self.x, self.y) or self.checkCoin(self.x, self.y) or self.checkGhost(self.x, self.y)):
 			self.x = random.randrange(0, 5, 1)
 			self.y = random.randrange(30, 35, 1)
 
@@ -154,10 +150,10 @@ def checkGhost(px, py, b_coords):											# mentioned in assignment
 
 if __name__ == "__main__":
 	a = Pacman()
-	b = [Ghost(), Ghost(), Ghost()]
-	b_coords = [[0,3], [0,15], [0,33]]
+	b = [Ghost(), Ghost(), Ghost()]											# objects of three ghosts. to increase/decrease number of ghosts create/delete Ghost() and initialize their values in next line
+	b_coords = [[0,3], [0,15], [0,33]]										# initial coordinates of three ghosts
 	a.board_design()
-	a.update_board(1, 1, b_coords)
+	a.update_board(1, 1, b_coords)											# b_coords are the coordinates of ghosts
 	print "*******Rules*********"
 	print "1. use W, A, S, D for movements"
 	print "2. use Q to quit the game"
@@ -165,10 +161,13 @@ if __name__ == "__main__":
 	a.print_board()
 	a.replace_dots()
 
+	p = "n"
 	while(True):
 		print ("Score: " + str(a.score))
 		p = raw_input("Enter direction: ")
-		px, py = a.new_position(p)
+		if p == "":
+			p = "n"
+		px, py = a.new_position(p[0])
 		for i in range(0, len(b_coords)):
 			b_coords[i] = b[i].ghostPosition()
 		checkGhost(px, py, b_coords)
